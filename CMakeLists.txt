@@ -35,6 +35,7 @@ enable_language(C ASM)
 add_executable(${CMAKE_PROJECT_NAME}
 
 
+
 )
 
 # Add STM32CubeMX generated sources
@@ -59,6 +60,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Application/irqHandlers.h
         Application/App_Button/app_button.c
         Application/App_Button/app_button.h
+        Application/App_Kalman/app_kalman.c
+        Application/App_Kalman/app_kalman.h
         Libraries/PID/pid.c
         Libraries/PID/pid.h
         Libraries/task.h

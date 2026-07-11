@@ -166,7 +166,7 @@ bool Vision_SelectConfig(const char *name);
  *       Vision_RxCallback(h, size);
  *   }
  */
-void Vision_RxCallback(UART_HandleTypeDef *huart, uint16_t Size);
+void Vision_RxCpltCallback(UART_HandleTypeDef *huart);
 
 /**
  * @brief  发送命令到相机（C板->MaixCam）

@@ -79,15 +79,15 @@ float PID_Compute(PID_TypeDef *PID, float FB)
 	{
 		err_dev = (err - PID->err_k_1) / deltaT;
 		//这是定速控制的，不需要积分分离
-		err_int = PID->err_int_k_1 + (err + PID->err_k_1) * deltaT * 0.5f;
+		//err_int = PID->err_int_k_1 + (err + PID->err_k_1) * deltaT * 0.5f;
 
-		// //定位置控制时，需要加入积分分离
+		 //定位置控制时，需要加入积分分离
 		//阈值的大小，先用pd控制器测几次稳态，误差最大值设为阈值
-		// if ( fabsf(err) < 积分分离阈值) {
-		// 	err_int = PID->err_int_k_1 + (err + PID->err_k_1) * deltaT * 0.5f;
-		// }else {
-		// 	err_int = 0;
-		// }
+		 if ( fabsf(err) < 10.0f ) {
+		 	err_int = PID->err_int_k_1 + (err + PID->err_k_1) * deltaT * 0.5f;
+		 }else {
+		 	err_int = 0;
+		 }
 	}
 
 	float COp = PID->Kp * err;

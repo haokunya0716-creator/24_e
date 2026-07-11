@@ -30,11 +30,14 @@ extern volatile float laser_current_yaw_target;
 extern volatile float laser_current_pitch;
 extern volatile float laser_current_pitch_target;
 
+extern uint8_t has_beeped_pro;
+
 /* ================== 函数声明区 ================== */
 void QD4310_PID_Init(void);
 void QD4310_PID_Pro(void);
 void QD4310_PID_Pro2(void);
 void QD4310_PID_Pro_Extend(void);
+void QD4310_PID_Pro_Extend5(void);
 void QD4310_PID_Reset(void);
 void QD4310_Vaild_Update(void);
 float PID_Compute_YAW(PID_TypeDef *PID, float FB);

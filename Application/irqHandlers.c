@@ -71,7 +71,7 @@ uint8_t task[6] = {0x11,0x12,0x13,0x14,0x15,0x99};//任务的标志位
  * 还有在串口屏显示数据的代码不要放在10HZ频率的任务里，放在100Hz的任务里就好怕卡屏
  */
 void DebugTask_Run() {
-        //电机控制任务 (100Hz),根据屏幕按键的状态来决定电机干嘛
+        //电机控制任务 (1000Hz),根据屏幕按键的状态来决定电机干嘛
         PERIODIC_START(MotorTask, 1)
             switch (sys_state) {
             case SYS_IDLE:
@@ -109,6 +109,8 @@ void DebugTask_Run() {
                     break;
             case SYS_TASK4:
                     if (task_flag == 0) {
+                        QD4310_PID_Reset();
+                        QD4310_PID_Reset();
                         task_flag++;
                         Vision_SendCommand(task[3],0);
                     }
@@ -118,11 +120,12 @@ void DebugTask_Run() {
             case SYS_TASK5:
                     if (task_flag == 0) {
                         QD4310_PID_Reset();
+                        QD4310_PID_Reset();//我写了两次复位，虽然应该没啥用
                         task_flag++;
                         Vision_SendCommand(task[4],0);
                     }
                     // 动态画圆 (同步 6cm 半径)
-                    QD4310_PID_Pro_Extend();
+                    QD4310_PID_Pro_Extend5();
                     break;
             case SYS_SETCENTER:
                     //点击标定按钮时，执行相机校准
@@ -252,8 +255,15 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
         HAL_UARTEx_ReceiveToIdle_DMA(&huart1, hmi_rx_buf, sizeof(hmi_rx_buf));
     }
-    else if (huart == &huart6) {  //相机数据
-        Vision_RxCallback(huart, Size);  // 调用协议栈处理
+    // else if (huart == &huart6) {  //相机数据
+    //     Vision_RxCallback(huart, Size);  // 调用协议栈处理
+    // }
+}
+// 新增这个函数 (可以放在 HAL_UARTEx_RxEventCallback 附近)
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    // 专门处理相机串口(huart6)的单字节中断
+    if (huart == &huart6) {
+        Vision_RxCpltCallback(huart);
     }
 }
 
