@@ -22,16 +22,18 @@
 #include "dma.h"
 #include "tim.h"
 #include "usart.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_QD4310_PID.h"
+#include "app_usart.h"
 #include "button_test.h"
-#include "buzzer_test.h"
-#include "delay_test.h"
-#include "irqHandlers.h"
 #include "QD4310.h"
+#include "task.h"
+#include "App_Task/app_task.h"
+#include "Emm_V5/Emm_V5.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,8 +54,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-volatile uint8_t buzzer_flag = 0;
-uint32_t buzzer_time = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,67 +106,29 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM12_Init();
   MX_TIM3_Init();
+  MX_CAN2_Init();
+  MX_USB_DEVICE_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  DebugTask_Init();//初始化的东西全在这里了，自己检查去吧
+  App_Task_Init();
   //Delay_Test();GetUs也能正常用
   //Button_Test();按键也能正常用（没测试长按）
   //Buzzer_Test();蜂鸣器是可以响的！
+
+  //Emm_V5_SetPosition(&YawMotor_Emm, +3.140f, 180);
+  Emm_V5_SetPositionDeg(&YawMotor_Emm, +90.0f, 180);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1) {
-    DebugTask_Run();
-    QD4310_PID_Pro();
-    if (buzzer_flag == 1) {
-      uint32_t arr_pwm = __HAL_TIM_GET_AUTORELOAD(&htim5);
-      uint32_t arr_buzzer = __HAL_TIM_GET_AUTORELOAD(&htim4);
+    while (1) {
 
-      // 开启RGB和蜂鸣器
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, arr_pwm * 0.2f);
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, arr_pwm * 0.2f);
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3, arr_pwm * 0.2f);
-      __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, arr_buzzer * 0.2f);
-    }else if (buzzer_flag == 0) {
 
-      // 关闭RGB和蜂鸣器
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,0);
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2,0);
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3,0);
-      __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,0);
+    PERIODIC_START(MAIN,10)
+      Emm_V5_RequestPosition(&YawMotor_Emm);
+      App_USART6_Printf("%lf\n",YawMotor_Emm.angle_deg);
 
-      // 清空标志位
-      buzzer_flag = 0;
-    }
-    //   uint32_t elapsed = HAL_GetTick() - buzzer_time; // 获取已经过去的时间
-    //
-    //   if (elapsed < 1900) {
-    //     // 阶段 1：等待期（0 - 1.9s）
-    //     // 保持静默，不要重置 buzzer_flag
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,0);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2,0);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3,0);
-    //     __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,0);
-    //   }
-    //   else if (elapsed >= 1900 && elapsed < 2100) {
-    //     // 阶段 2：响铃期（1.9s - 2.1s）
-    //     uint32_t arr_pwm = __HAL_TIM_GET_AUTORELOAD(&htim5);
-    //     uint32_t arr_buzzer = __HAL_TIM_GET_AUTORELOAD(&htim4);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, arr_pwm * 0.2f);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, arr_pwm * 0.2f);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3, arr_pwm * 0.2f);
-    //     __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, arr_buzzer * 0.2f);
-    //   }
-    //   else {
-    //     // 阶段 3：结束期（超过 2.1s）
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 0);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 0);
-    //     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3, 0);
-    //     __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 0);
-    //     buzzer_flag = 0; // 只有流程全部跑完了，才重置标志位
-    //   }
-    // }
-
+    PERIODIC_END
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -197,7 +160,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 6;
   RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -219,6 +182,84 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+//初始化CAN配置
+void CAN_InterfaceInit() {
+    //CAN滤波器配置
+    CAN_FilterTypeDef sFilterConfig;
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.SlaveStartFilterBank = 14;
+    //这里已经开启了滤波器配置
+    if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK) Error_Handler();
+    //这里已经开启了CAN
+    if (HAL_CAN_Start(&hcan1) != HAL_OK) Error_Handler();
+    //这里已经开启了CAN的接收中断
+    if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
+
+    //CAN滤波器配置
+    CAN_FilterTypeDef sFilterConfig2;
+    sFilterConfig2.FilterBank = 14;
+    sFilterConfig2.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig2.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig2.FilterIdLow = 0x0000;
+    sFilterConfig2.FilterIdHigh = 0x0000;
+    sFilterConfig2.FilterMaskIdLow = 0x0000;
+    sFilterConfig2.FilterMaskIdHigh = 0x0000;
+    sFilterConfig2.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig2.FilterActivation = ENABLE;
+    sFilterConfig2.SlaveStartFilterBank = 14;
+    //这里已经开启了滤波器配置
+    if (HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig2) != HAL_OK) Error_Handler();
+    //这里已经开启了CAN
+    if (HAL_CAN_Start(&hcan2) != HAL_OK) Error_Handler();
+    //这里已经开启了CAN的接收中断
+    if (HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
+}
+//CAN接收回调函数
+//CAN接收回调函数
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+  // 统一在最上面定义，数组大小必须是 8！
+  CAN_RxHeaderTypeDef rx_header;
+  uint8_t rx_data[8];
+
+  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, rx_data) != HAL_OK) {
+    return;
+  }
+
+  // CAN1 处理 QD4310
+  if (hcan == &hcan1) {
+    // 确认是正确的ID
+    if (rx_header.IDE == CAN_ID_STD) {
+      if (rx_header.StdId >= 0x500 && rx_header.StdId <= 0x508) {
+        if (rx_header.StdId == 0x500) {
+          QD4310_Update(&YawMotor, rx_data); // 更新云台yaw轴的状态
+        } else if (rx_header.StdId == 0x501) {
+          QD4310_Update(&PitchMotor, rx_data); // 更新云台pitch轴的状态
+        }
+      }
+    }
+  }
+
+  // CAN2 处理步进电机 Emm_V5
+
+  // 接收数据
+  else if (hcan == &hcan2)
+  {
+    // 如果使用的是扩展帧，且收到的 ID 包含你设置的 ID_Addr
+    if(rx_header.IDE == CAN_ID_EXT && (rx_header.ExtId >> 8) == YawMotor_Emm.id)
+    {
+      Emm_V5_Update(&YawMotor_Emm, rx_data, rx_header.DLC);
+    }
+  }
+}
 /* USER CODE END 4 */
 
 /**

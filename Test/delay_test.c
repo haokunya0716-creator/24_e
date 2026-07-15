@@ -12,7 +12,7 @@
 #include "usart.h"
 #include "../Application/App_Usartptint/app_usart.h"
 
-#include "vofa.h"
+
 
 void Delay_Test(void) {
     char string[100]="start\n";

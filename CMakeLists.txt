@@ -33,7 +33,14 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
-
+        Application/App_Task/app_task.c
+        Application/App_Task/app_task.h
+        Libraries/Emm_V5/Emm_V5.c
+        Libraries/Emm_V5/Emm_V5.h
+        Application/App_Emm_V5/app_Emm_V5.c
+        Application/App_Emm_V5/app_Emm_V5.h
+        Application/App_roboarm/app_roboarm.c
+        Application/App_roboarm/app_roboarm.h
 
 
 )
@@ -50,37 +57,20 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+
+        Application/App_Button/app_button.c
+        Application/App_QD4310_PID/app_QD4310_PID.c
+        Application/App_Usartptint/app_usart.c
+
+        Libraries/Button/button.c
+        Libraries/Delay/delay.c
+        Libraries/PID/pid.c
+        Libraries/QD4310/QD4310.c
+        Application/App_Solenoid/app_solenoid.c
+        Application/App_Solenoid/app_solenoid.h
+
         Test/button_test.c
         Test/button_test.h
-        Libraries/QD4310/QD4310.c
-        Libraries/QD4310/QD4310.h
-        Libraries/Delay/delay.c
-        Libraries/Delay/delay.h
-        Application/irqHandlers.c
-        Application/irqHandlers.h
-        Application/App_Button/app_button.c
-        Application/App_Button/app_button.h
-        Application/App_Kalman/app_kalman.c
-        Application/App_Kalman/app_kalman.h
-        Libraries/PID/pid.c
-        Libraries/PID/pid.h
-        Libraries/task.h
-        Libraries/Vofa/vofa.c
-        Libraries/Vofa/vofa.h
-        Libraries/HMI/HMI.c
-        Libraries/HMI/HMI.h
-        Application/MyTask/mytask.c
-        Application/MyTask/mytask.h
-        Application/Protocol/vision_protocol.c
-        Application/Protocol/vision_protocol.h
-        Application/App_Usartptint/app_usart.c
-        Application/App_Usartptint/app_usart.h
-        Application/App_QD4310_PID/app_QD4310_PID.c
-        Application/App_QD4310_PID/app_QD4310_PID.h
-        Libraries/Button/button.c
-        Libraries/Button/button.h
-        Libraries/Laser/laser.c
-        Libraries/Laser/laser.h
         Test/buzzer_test.c
         Test/buzzer_test.h
         Test/delay_test.c
@@ -92,20 +82,21 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
-        Libraries/Laser
-        Libraries/QD4310
-        Libraries/Delay
-        Libraries/Button
         Application
-        Libraries/PID
-        Libraries
-        Libraries/Vofa
-        Libraries/HMI
-        Application/MyTask
-        Application/Protocol
         Application/App_Button
-        Application/App_Usartptint
         Application/App_QD4310_PID
+        Application/App_Usartptint
+        Application/App_Solenoid
+        Application/App_Emm_V5
+
+        Libraries
+        Libraries/Emm_V5
+        Libraries/Button
+        Libraries/Delay
+        Libraries/PID
+        Libraries/QD4310
+
+
         Test
 )
 

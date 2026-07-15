@@ -44,6 +44,7 @@ typedef enum
 } QD4310_Command_t;
 
 //函数声明
+void CAN_InterfaceInit();//初始化can
 
 void QD4310_Init(QD4310_t *dev, CAN_HandleTypeDef *hcan, uint8_t id);
 void QD4310_Enable(QD4310_t *dev);
