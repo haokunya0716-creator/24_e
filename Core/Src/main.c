@@ -32,6 +32,7 @@
 #include "button_test.h"
 #include "QD4310.h"
 #include "task.h"
+#include "App_roboarm/app_roboarm.h"
 #include "App_Task/app_task.h"
 #include "Emm_V5/Emm_V5.h"
 /* USER CODE END Includes */
@@ -114,9 +115,10 @@ int main(void)
   //Delay_Test();GetUs也能正常用
   //Button_Test();按键也能正常用（没测试长按）
   //Buzzer_Test();蜂鸣器是可以响的！
+  //机械臂的角度，和电机旋转角度的比是4.5:1
+  //Robo_Set_YawDeg(-3);
+  //Emm_V5_SetPositionRad(1, -3.1415926f, 200);
 
-  //Emm_V5_SetPosition(&YawMotor_Emm, +3.140f, 180);
-  Emm_V5_SetPositionDeg(&YawMotor_Emm, +90.0f, 180);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -125,9 +127,12 @@ int main(void)
 
 
     PERIODIC_START(MAIN,10)
-      Emm_V5_RequestPosition(&YawMotor_Emm);
-      App_USART6_Printf("%lf\n",YawMotor_Emm.angle_deg);
 
+      //Emm_V5_RequestPosition(1);
+      //App_USART6_Printf("%f\n",Emm_V5_Position.angle_deg);
+      Set_Big_Rad(0);
+      Set_Small_Rad(0.6);
+      App_USART6_Printf("%f,%f\n",SmallMotor.angle,BigMotor.angle);
     PERIODIC_END
     /* USER CODE END WHILE */
 
@@ -240,23 +245,17 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     if (rx_header.IDE == CAN_ID_STD) {
       if (rx_header.StdId >= 0x500 && rx_header.StdId <= 0x508) {
         if (rx_header.StdId == 0x500) {
-          QD4310_Update(&YawMotor, rx_data); // 更新云台yaw轴的状态
+          QD4310_Update(&SmallMotor, rx_data); // 更新云台yaw轴的状态
         } else if (rx_header.StdId == 0x501) {
-          QD4310_Update(&PitchMotor, rx_data); // 更新云台pitch轴的状态
+          QD4310_Update(&BigMotor, rx_data); // 更新云台pitch轴的状态
         }
       }
     }
   }
 
-  // CAN2 处理步进电机 Emm_V5
-
-  // 接收数据
-  else if (hcan == &hcan2)
-  {
-    // 如果使用的是扩展帧，且收到的 ID 包含你设置的 ID_Addr
-    if(rx_header.IDE == CAN_ID_EXT && (rx_header.ExtId >> 8) == YawMotor_Emm.id)
-    {
-      Emm_V5_Update(&YawMotor_Emm, rx_data, rx_header.DLC);
+  else if (hcan == &hcan2) {
+    if (rx_header.IDE == CAN_ID_EXT) {
+      Emm_V5_UpdatePosition(1, rx_header.ExtId, rx_data, rx_header.DLC);
     }
   }
 }

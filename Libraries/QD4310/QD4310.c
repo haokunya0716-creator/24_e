@@ -9,6 +9,8 @@
 //创建电机对象结构体，这里暂时先创建Yaw轴电机
 QD4310_t YawMotor;
 QD4310_t PitchMotor;
+QD4310_t SmallMotor;//小臂
+QD4310_t BigMotor;//大臂
 
 // 简单的钳位宏，替代 std::clamp，限定x的最小值min和最大值max
 #define CLAMP(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
@@ -55,6 +57,8 @@ void QD4310_Init(QD4310_t *dev, CAN_HandleTypeDef *hcan, uint8_t id) {
 void QD4310_Enable(QD4310_t *dev) { QD4310_SendCommand(dev, QD4310_CMD_ENABLE, 0); }
 //失能电机
 void QD4310_Disable(QD4310_t *dev) { QD4310_SendCommand(dev, QD4310_CMD_DISABLE, 0); }
+
+void QD4310_RequestFeedback(QD4310_t *dev) { QD4310_SendCommand(dev, QD4310_Cmd_NOP, 0); }
 
 void QD4310_Update(QD4310_t *dev, const uint8_t feedback[8]) {
     dev->enabled = feedback[0] & 0x01;

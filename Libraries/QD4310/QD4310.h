@@ -31,6 +31,8 @@ typedef struct
 //ectern结构体变量来让外界能访问
 extern QD4310_t YawMotor;
 extern QD4310_t PitchMotor;
+extern QD4310_t SmallMotor;//小臂
+extern QD4310_t BigMotor;//大臂
 //电机命令枚举结构体
 typedef enum
 {
@@ -49,6 +51,7 @@ void CAN_InterfaceInit();//初始化can
 void QD4310_Init(QD4310_t *dev, CAN_HandleTypeDef *hcan, uint8_t id);
 void QD4310_Enable(QD4310_t *dev);
 void QD4310_Disable(QD4310_t *dev);
+void QD4310_RequestFeedback(QD4310_t *dev);
 
 /**
  * @param dev 电机对象

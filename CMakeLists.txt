@@ -33,14 +33,7 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
-        Application/App_Task/app_task.c
-        Application/App_Task/app_task.h
-        Libraries/Emm_V5/Emm_V5.c
-        Libraries/Emm_V5/Emm_V5.h
-        Application/App_Emm_V5/app_Emm_V5.c
-        Application/App_Emm_V5/app_Emm_V5.h
-        Application/App_roboarm/app_roboarm.c
-        Application/App_roboarm/app_roboarm.h
+
 
 
 )
@@ -61,13 +54,18 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Application/App_Button/app_button.c
         Application/App_QD4310_PID/app_QD4310_PID.c
         Application/App_Usartptint/app_usart.c
+        Application/App_Task/app_task.c
+        Application/App_Emm_V5/app_Emm_V5.c
+        Application/App_roboarm/app_roboarm.c
+        Application/App_Solenoid/app_solenoid.c
+        Application/App_Solenoid/app_solenoid.h
 
         Libraries/Button/button.c
         Libraries/Delay/delay.c
         Libraries/PID/pid.c
         Libraries/QD4310/QD4310.c
-        Application/App_Solenoid/app_solenoid.c
-        Application/App_Solenoid/app_solenoid.h
+        Libraries/Emm_V5/Emm_V5.c
+
 
         Test/button_test.c
         Test/button_test.h
@@ -82,6 +80,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
+        Core/Inc
         Application
         Application/App_Button
         Application/App_QD4310_PID
@@ -89,8 +88,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         Application/App_Solenoid
         Application/App_Emm_V5
 
+
         Libraries
-        Libraries/Emm_V5
         Libraries/Button
         Libraries/Delay
         Libraries/PID
