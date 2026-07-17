@@ -19,8 +19,9 @@ extern float Kd_pitch;
 
 /* ================== 函数声明区 ================== */
 void QD4310_PID_Init(void);
+void AD4310_PID_Reset(void);
 void QD4310_PID_Pro(void);
-void QD4310_PID_Reset(void);
+
 void Set_Big_Rad(float rad);
 void Set_Small_Rad(float rad);
 
